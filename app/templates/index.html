@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Mapa Interactivo de Ecuador</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Fuentes y estilos -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(90deg, #f8ad25, #0e4c71, #e72f2b);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+
+    #map {
+      flex: 1;
+      margin: 20px auto;
+      border: 4px solid #0e4c71;
+      width: 95%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #0e4c71;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Mapa Interactivo de las Provincias del Ecuador 🇪🇨</h1>
+  </header>
+
+  <div id="map"></div>
+
+  <footer>
+    © 2025 - Escuela Politécnica Nacional | Proyecto Flask + Leaflet
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const bounds = L.latLngBounds(
+      L.latLng(-5.0, -82.0),
+      L.latLng(2.5, -75.0)
+    );
+
+    const map = L.map('map', {
+      maxBounds: bounds,
+      maxBoundsViscosity: 1.0,
+      minZoom: 6,
+      maxZoom: 10
+    }).setView([-1.8312, -78.1834], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+
+    fetch('/api/provincias')
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(p => {
+          const marker = L.marker([p.lat, p.lng]).addTo(map);
+          marker.bindPopup(`
+          <div style="font-family: Montserrat; line-height:1.4;">
+            <h4 style="margin: 0; color: #0e4c71;">${p.nombre}</h4>
+            <strong>Capital:</strong> ${p.capital}<br>
+            <strong>Área:</strong> ${p.area} km²<br>
+            <strong>Población:</strong> ${p.poblacion.toLocaleString()}<br>
+            <strong>Región:</strong> ${p.region}<br>
+            <strong>Zona de Planificación:</strong> ${p.zona_planificacion}<br>
+            <strong>Coordenadas:</strong> (${p.lat}, ${p.lng})
+          </div>
+        `);
+        });
+      });
+  </script>
+</body>
+
+</html>
